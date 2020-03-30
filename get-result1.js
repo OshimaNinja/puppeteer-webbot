@@ -18,82 +18,72 @@ const getResult = async (data) => {
 
     const value = setConfigValue(data);
     // console.log("aaaa")
-    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] })
-    const page = await browser.newPage()
+    puppeteer.launch({ headless: false, args: ['--no-sandbox'] }).then( async browser => {
+        const page = await browser.newPage()
 
-    await page.setViewport({ width: 1600, height: 700 })
-    console.log("start!")
+        await page.setViewport({ width: 1600, height: 700 })
+        console.log("start!")
 
-    await page.navigateUntilReady('https://approve.me/s/spg/43615#/splash')
-    await page.clickIfExists('label[for="agreeTC"] span[data-l10n-id="am_sf_splash_iHaveReadAndIAgree"]')
+        await page.navigateUntilReady('https://approve.me/s/spg/43615#/splash')
+        await page.clickIfExists('label[for="agreeTC"] span[data-l10n-id="am_sf_splash_iHaveReadAndIAgree"]')
 
-    await page.formFillOut(configs, {});
+        await page.formFillOut(configs, {});
 
-    await twoPage(page, value);
+        await twoPage(page, value);
 
-    await aboutYou(page, value);
+        await aboutYou(page, value);
 
-    await aboutYou2(page, value);
-    
-    await aboutYou3(page, value);
-    
-    await aboutYou4(page, value);
+        await aboutYou2(page, value);
 
-    await page.waitUntilActionReady();
+        await aboutYou3(page, value);
 
-    await incomePage1(page, value);
+        await aboutYou4(page, value);
 
-    await incomePage2(page, value);
+        await incomePage1(page, value);
 
-    await incomePage3(page, value);
+        await incomePage2(page, value);
 
-    await incomePage4(page, value);
+        await incomePage3(page, value);
 
-    await paymentPage1(page, value);
+        await incomePage4(page, value);
 
-    await paymentPage2(page, value);
+        await paymentPage1(page, value);
 
-    await paymentPage3(page, value);
+        await paymentPage2(page, value);
 
-    await paymentPage4(page, value);
+        await paymentPage3(page, value);
 
-    await reviewPage1(page, value);
-    const filename = 'result/Result_' + (new Date()).getTime() + '.png';
-    await page.screenshot({ path: './public/' + filename });
+        await paymentPage4(page, value);
 
-    console.log("Program Ended! Thanks!");
+        await reviewPage1(page, value);
 
-    await browser.close()
+        await page.screenshot({ path: 'example.png' });
+
+        console.log("Program Ended! Thanks!");
+
+        await browser.close()
+    });
     console.log("Really end!");
-    
-    return filename;
 }
 
 twoPage = async (page, value) => {
     console.log("two page;", page.url())
 
     await page.formFillOut(twoConfig, value)
-
-    // await page.clickIfExists('button#MoveNext');
 }
 
 aboutYou = async (page, value) => {
     console.log('About You Page:', page.url());
-    
-    await page.formFillOut(aboutYouConfig, value);
+    await page.waitForSelector('a[ng-click="def.action()"]');
+    await page.clickIfExists('a[ng-click="def.action()"]');
+    await page.waitUntilActionReady();
 
-    const emailcheck = await page.$('input[name="Customer_Email"]');
-    if ( emailcheck ){
-        console.log('again click')
-        await page.clickIfExists('button#MoveNext');
-    }
-    
+    await page.formFillOut(aboutYouConfig, value);
 }
 
 aboutYou2 = async (page, value) => {
     console.log("About You 2 page");
-    await page.screenshot({path: 'about2-test.png'});
-    
+    await page.waitForSelector('input[name="Address_Zip"]');
     await page.typeIfExists('input[name="Address_Zip"]', value.Address_Zip, "");
 
     await page.formFillOut(aboutYou2Config, value);
@@ -101,15 +91,23 @@ aboutYou2 = async (page, value) => {
 
 aboutYou3 = async (page, value) => {
     console.log("About You 3th page");
-    
+    await page.waitForSelector('button#Residence_HousingStatus_Rent');
     const residence = value.you_residence;
     await page.formFillOut(residence == "Rent" ? [aboutYou3Config[0]] : [aboutYou3Config[1]]);
 }
 
 aboutYou4 = async (page, value) => {
     console.log("About You 4th Page:", page.url());
-    await page.typeIfExists('input[name="Identification_Number"]', value.identificationNumber, "ID number:");
-
+    await page.waitForSelector('select#Identification_IdentificationType');
+    await page.screenshot({path: "about-4.png"});
+    // await page.select('select[id="Identification_IdentificationType"]', value.identificationType)
+    // await page.toggleSelectByText('select[ng-model="Customer.Identification.IdentificationType"]', value.identificationType, 'identificationType');
+    const selectElem = await page.$('select#Identification_IdentificationType');
+    console.log(selectElem);
+    await selectElem.type(value.identificationType);
+    console.log('select', value.identificationType)
+    await page.typeIfExists('#Identification_Number', value.identificationNumber, "identificationNumber");
+    await page.toggleSelectByText('select[ng-model="Customer.Identification.State"]', value.identificationState, 'identificationState');
     await page.formFillOut(aboutYou4Config, value);
 }
 
@@ -138,17 +136,11 @@ incomePage4 = async (page, value) => {
     console.log("Income Page 4th");
 
     await page.formFillOut(incomePage4Config, value);
-    const incomeNext = page.$('input[name="IncomeSource_PreviousPayDate"]')
-    if (incomeNext) {
-        console.log('Income page again click!');
-        await page.clickIfExists('button#MoveNext');
-    }
-    await page.screenshot({path: 'income4-test.png'})
 }
 
 paymentPage1 = async (page, value) => {
     console.log("Payment Page start!");
-    await page.screenshot({path: 'payment-test.png'})
+
     await page.formFillOut(paymentPage1Config, value);
 }
 
@@ -181,136 +173,73 @@ reviewPage1 = async (page, value) => {
     await page.formFillOut(reviewPage1Config, value);
 }
 
-const getDateType = str => {
-    str = str.split('-');
-    return str[1] + '/' + str[2] + '/' + str[0];
-}
-
-const getPassDate = date => {
-    const d1 = new Date(date);
-    const d2 = new Date();
-    console.log(d2.getMonth(), d1.getMonth())
-    let months;
-    months = (d2.getFullYear() - d1.getFullYear()) * 12;
-    months -= d1.getMonth() + 1;
-    months += d2.getMonth() + 1;
-    console.log(months)
-    if (months <= 0) return [0, 0];
-    let year = parseInt(months / 12);
-    months = months % 12;
-    return [year, months]
-}
-
-const primaryIncome = {
-    'Employer' :'Employed Full-Time',
-    'Social Security': 'Social Security',
-    'Self-employed': 'Self-Employed',
-    'Retirement': 'Other',
-    'Disability': 'Other'
-}
-
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-}
-
-const getPaid = {
-    'Weekly': 'Weekly',
-    'Bi-Weekly': 'Every Other Week',
-    'Monthly': 'Monthly',
-    'Semi-Monthl': 'Twice Per Month'
-}
-
-const getExpiration = str => {
-    str = str.split('/');
-    const monthdata = {
-        '01': '01 - January',
-        '02': '02 - February',
-        '03': '03 - March',
-        '04': '04 - April',
-        '05': '05 - May',
-        '06': '06 - June',
-        '07': '07 - July',
-        '08': '08 - August',
-        '09': '09 - September',
-        '10': '10 - October',
-        '11': '11 - November',
-        '12': '12 - December',
-    }
-
-    return [monthdata[str[0]], "20" + str[1]];
-}
-
 const setConfigValue = data => {
-    const passDate = getPassDate(data.Bank_Ac_Open_Date);
-    const expriation = getExpiration(data.Expiration);
     return {
         //two config page
-        custom_firstname: data.custom_firstname,
-        custom_lastname: data.custom_lastname,
-        custom_dateofbirth: getDateType(data.Date_Of_Birth),
-        custom_ssn: data.Social_Security_Number,
+        custom_firstname: "Thomas",
+        custom_lastname: "Jang",
+        custom_dateofbirth: "03/12/1990",
+        custom_ssn: "432594248",
         ///aboutYouValue
-        custom_email: data.custom_email,
-        custom_primary_phone: data.custom_primary_phone,
+        custom_email: "thomasjang57@gmail.com",
+        custom_primary_phone: "8707538767",
         ///aboutYou2Value
-        Address_Line1: data.Street_Adress,
+        Address_Line1: "5500 Camden Ln",
         Address_Line2: "",
-        Address_City: data.City,
+        Address_City: "Jonebsoro",
         Address_State: "Arkansas",
-        Address_Zip: data.Zip,
-        Residence_YearsAtAddress: "5",
+        Address_Zip: "72404",
+        Residence_YearsAtAddress: "2",
         Residence_MonthsAtAddress: "",
 
         ///about 3th page
-        you_residence: data.staying,
+        you_residence: "Rent",
 
         ////aboutYou4Value
         identificationType: "Drivers License",
-        identificationNumber: data.Driving_Licence_Number,
+        identificationNumber: "929048541",
         identificationState: "Arkansas",
 
         //incomePage1Value = {
-        income_type: primaryIncome[data.Source_of_primary_Income],
+        income_type: "Employed Full-Time",
 
         //incomePage2Value = {
-        employer_name: data.Employer_Name,
-        employer_phone: data.Employer_Phone_No,
-        employer_zip: data.Employer_Zip,
+        employer_name: 'HINO MOTORS MANUFACTURING',
+        employer_phone: '8707023000',
+        employer_zip: '72364',
 
         //incomePage3Value = {
-        employed_year: getRandomInt(1, 4),
+        employed_year: '2',
         employed_month: '',
-        employed_income: getRandomInt(2800, 3501),
+        employed_income: '60.95',
         // incomePage4Value = {
-        frequency_type: getPaid[data.How_Often_Do_you_get_Paid],
-        pre_pay_date: getDateType(data.Last_Payday),
+        frequency_type: 'Weekly',
+        pre_pay_date: '02/26/2020',
 
         
         // paymentPage1Value = {
-        routing_number: data.Routing_No,
-        account_number: data.Bank_Account_No,
-        bank_openyear: passDate[0],
-        bank_openmonth: passDate[1],
+        routing_number: "031101279",
+        account_number: '156127545236',
+        bank_openyear: '1',
+        bank_openmonth: '6',
 
         // payment page 2th
 
-        payment_deposit: data.pay,
+        payment_deposit: "Yes",
 
         //paymentPage3Value = {
-        card_cardnumber: data.card_cardnumber,
-        card_exmonth: expriation[0],
-        card_exyear: expriation[1],
-        card_firstname: data.custom_firstname,
-        card_lastname: data.custom_lastname,
+        card_cardnumber: "5555555555554444",
+        card_exmonth: '05 - May',
+        card_exyear: '2020',
+        card_firstname: 'Thomas',
+        card_lastname: 'Jang',
         
         // paymentPage4Value = {
-        card_address: data.Street_Adress,
+        card_address: "5500 Camden Ln",
         card_line2: "",
-        card_city: data.City,
+        card_city: "Jonebsoro",
         card_state: "Arkansas",
-        card_zip: data.Zip,
+        card_zip: "72404",
     }
 }
 
@@ -435,18 +364,6 @@ aboutYou3Config = [
 
 
 aboutYou4Config = [
-    {
-        label: 'Type of photo ID:',
-        selector: 'select[name="Identification_IdentificationType"]',
-        type: 'select-text',
-        value: 'identificationType'
-    },
-    {
-        label: 'State issued:',
-        selector: 'select[name="Identification_State"]',
-        type: 'select-text',
-        value: 'identificationState'
-    },
     {
         label: 'Next',
         selector: 'button#MoveNext',
@@ -683,7 +600,7 @@ reviewPage1Config = [
     }
 ]
 
-// console.log(getPassDate('2010-04-03'));
+getResult({})
 
 module.exports = {
     getResult

@@ -5,9 +5,10 @@ const Result = require('../get-result');
 router.post("/", async (req, res) => {
     try{
         console.log(req.body);
-        await Result.getResult({})
-        return res.sendStatus(200);
+        const path = await Result.getResult(req.body);
+        return res.json({state: 1, path});
     }catch(error) {
+        console.log(error)
         return res.json({error: error})
     }
     
