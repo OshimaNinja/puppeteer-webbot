@@ -58,6 +58,12 @@ const getResult = async (data) => {
     await paymentPage4(page, value);
 
     await reviewPage1(page, value);
+
+    await page.waitForSelector('.approval-amount', {timeout: 10000});
+
+    const element = await page.$(".approval-amount");
+    const text = await (await element.getProperty('textContent')).jsonValue();
+
     const filename = 'result/Result_' + (new Date()).getTime() + '.png';
     await page.screenshot({ path: './public/' + filename });
 
@@ -66,7 +72,7 @@ const getResult = async (data) => {
     await browser.close()
     console.log("Really end!");
     
-    return filename;
+    return {filename, text};
 }
 
 twoPage = async (page, value) => {
