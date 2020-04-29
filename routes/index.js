@@ -1,5 +1,6 @@
 var routes = [
-	{path: "/", controller: "index_controller"}
+	{path: "/", controller: "index_controller"},
+	{path: "/plaid", controller: "plaid_controller"}
 ];
 
 exports.activate = function(app){

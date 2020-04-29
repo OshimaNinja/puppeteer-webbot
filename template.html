@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <mate charest="utf-8" />
+        <title>Hello world!</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    </head>
+    <body>
+        <h1>Balance</h1>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Mask</th>
+                <th scope="col">Official Name</th>
+                <th scope="col">Type</th>
+                <th scope="col">Available</th>
+                <th scope="col">Current</th>
+                <th scope="col">Currency Code</th>
+                <th scope="col">Balance Limit</th>
+              </tr>
+            </thead>
+            <tbody>
+                {{#each accounts}}
+                    <tr>
+                        <td>
+                            {{this.name}}
+                        </td>
+                        <td>
+                            {{this.mask}}
+                        </td>
+                        <td>
+                            {{this.official_name}}
+                        </td>
+                        <td>
+                            {{this.type}}
+                        </td>
+                        <td>
+                            {{this.balances.available}}
+                        </td>
+                        <td>
+                            {{this.balances.current}}
+                        </td>
+                        <td>
+                            {{this.balances.iso_currency_code}}
+                        </td>
+                        <td>
+                            {{this.balances.limit}}
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
+        <h1>Transactions</h1>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Name</th>
+                <th scope="col">Type</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Channel</th>
+                <th scope="col">Owner</th>
+                <th scope="col">Pending</th>
+              </tr>
+            </thead>
+            <tbody>
+                {{#each transactions}}
+                    <tr>
+                        <td>
+                            {{this.date}}
+                        </td>
+                        <td>
+                            {{this.name}}
+                        </td>
+                        <td>
+                            {{this.transaction_type}}
+                        </td>
+                        <td>
+                            {{this.amount}} {{this.iso_currency_code}}
+                        </td>
+                        
+                        <td>
+                            {{this.payment_channel}}
+                        </td>
+                        <td>
+                            {{this.account_owner}}
+                        </td>
+                        <td>
+                            {{#if this.pendding}}
+                                Yes
+                            {{^}}
+                                No
+                            {{/if}}
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    </body>
+</html>

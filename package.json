@@ -10,6 +10,8 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "pdf-creator-node": "^1.4.1",
+    "plaid": "^4.11.0",
     "puppeteer": "^2.1.1",
     "puppeteer-extra": "^3.1.9",
     "puppeteer-extra-plugin-angular": "^3.2.1"
